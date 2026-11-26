@@ -605,6 +605,120 @@ showPosts();`, why: 'أي حاجة ممكن تبوظ في الطريق: النت
   ]
 },
 {
+  id: 'async-await',
+  nav: 'async و await',
+  title: 'الكود غير المتزامن: Promises و async/await',
+  subtitle: 'إزاي تستنى الداتا من غير ما توقف الصفحة، وإزاي تمسك الأغلاط',
+  blocks: [
+    { type: 'p', text: 'في درس fetch شفت إن طلب الإنترنت بياخد وقت، ومش بيرجع النتيجة في نفس اللحظة. المشكلة: JavaScript مش بتقف وتستنى، بتكمل تنفيذ اللي بعده. لو جربت تقرا النتيجة في السطر اللي بعد fetch مباشرة هتلاقي حاجة اسمها Promise مش الداتا اللي عايزها. الدرس ده بيفك اللغز ده كله.' },
+    { type: 'h', text: 'الـ Promise: وصل أمانة' },
+    { type: 'code', code: `const p = fetch('https://api.example.com/user');
+console.log(p); // Promise { <pending> }` },
+    { type: 'p', text: 'الـ Promise هو "وعد" بنتيجة جاية: لسه شغال (pending)، يا إما نجح (fulfilled) يا إما فشل (rejected). زي وصل الاستلام في المغسلة: الورقة مش الهدوم، بس بتضمنلك تستلمهم لما يجهزوا. والـ then هو "تعالى استلم لما يجهز".' },
+    { type: 'h', text: 'async/await: نفس الفكرة بشكل طبيعي' },
+    { type: 'code', code: `async function getUser() {
+  const response = await fetch('https://api.example.com/user');
+  const data = await response.json();
+  console.log(data.name);
+}
+getUser();` },
+    { type: 'p', text: 'await بيقول: استنى النتيجة هنا قبل ما تكمل. الكود بيتقري طبيعي من فوق لتحت زي ما انت متعود. الشرط الوحيد: await بتشتغل بس جوا دالة معرفة بـ async. وورا الكواليس؟ نفس الـ Promises بالظبط، بشكل أريح في القراية.' },
+    { type: 'note', text: 'await بتوقف الدالة الحالية بس، مش الصفحة كلها. المتصفح فاضي يرد على المستخدم ويرسم ويشغل أي كود تاني لحد ما النتيجة توصل. دي العبقرية كلها: استنى من غير تجميد.' },
+    { type: 'h', text: 'لما النت يفصل: try و catch' },
+    { type: 'code', code: `async function getUser() {
+  try {
+    const response = await fetch('https://api.example.com/user');
+    if (!response.ok) throw new Error('السيرفر رد بـ ' + response.status);
+    const data = await response.json();
+    console.log(data.name);
+  } catch (err) {
+    console.log('حصلت مشكلة: ' + err.message);
+  }
+}` },
+    { type: 'p', text: 'أي await ممكن يفشل: النت فصل، السيرفر واقع، الرابط غلط. من غير try/catch الخطأ بيطلع في الكونسول والمستخدم ميعرفش حاجة. بـ try/catch انت اللي بتقرر يظهر إيه: رسالة اعتذار، زرار إعادة المحاولة، أي حاجة لائقة.' },
+    { type: 'note', text: 'تفصيلة بتقع فيها ناس كتير: fetch مش بيعتبر 404 أو 500 فشل! الطلب نجح طالما السيرفر رد، حتى لو الرد "مش لاقي الصفحة". عشان كده لازم تتأكد من response.ok بنفسك زي المثال.' },
+    { type: 'h', text: 'أكتر من طلب في نفس الوقت: Promise.all' },
+    { type: 'code', code: `async function loadDashboard() {
+  const [userRes, ordersRes] = await Promise.all([
+    fetch('https://api.example.com/user'),
+    fetch('https://api.example.com/orders')
+  ]);
+  const user = await userRes.json();
+  const orders = await ordersRes.json();
+  console.log(user.name, orders.length);
+}` },
+    { type: 'p', text: 'لو كتبت الاتنين await ورا بعض، التاني بيستنى الأول يخلص، وده ضياع وقت. Promise.all بيبعت الطلبين مع بعض ويستناهم الاتنين، فوقت التحميل يبقى أطول واحد فيهم مش مجموعهم. في لوحة تحكم فيها 5 مصادر داتا، الفرق ده ممكن يوصل ثواني.' },
+    { type: 'h', text: 'أغلاط أول مرة' },
+    { type: 'list', items: [
+      'نسيت كلمة async في تعريف الدالة: المتصفح هيقولك await مش معروفة هنا.',
+      'استخدمت await فوق في الملف من غير دالة: نفس الخطأ. لف الكود في دالة async وناديها.',
+      'await على حاجة مش Promise زي رقم عادي: مش هتكسر، بس هترجع القيمة فوراً من غير فايدة.',
+      'نسيت response.json() نفسها محتاجة await: هتطبع Promise بدل الداتا.'
+    ] }
+  ],
+  quiz: [
+    { q: 'fetch بترجع إيه لحظة ما تناديها؟', options: [
+      { text: 'الداتا اللي طلبتها من السيرفر مباشرة' },
+      { text: 'Promise: وعد بنتيجة هتوصل بعدين' },
+      { text: 'رقم يمثل كام ثانية الطلب هياخد' }
+    ], answer: 1, explain: 'الطلب لسه ماشي على الشبكة، فمفيش داتا دلوقتي. بترجع Promise حالتها pending لحد ما الرد يوصل.' },
+    { q: 'كلمة await بتشتغل فين بس؟', options: [
+      { text: 'جوا دالة متعرفة بـ async' },
+      { text: 'في أي مكان في الملف حتى لو بره الدوال' },
+      { text: 'جوا حلقة for بس' }
+    ], answer: 0, explain: 'من غير async في تعريف الدالة هيطلعلك خطأ SyntaxError. دي أشهر غلطة في الموضوع ده كله.' },
+    { q: 'await fetch(...) بيعمل إيه بالظبط؟', options: [
+      { text: 'بيوقف الصفحة كلها لحد ما الرد يوصل' },
+      { text: 'بيوقف تنفيذ الدالة الحالية بس عند السطر ده لحد الـ Promise ما تتحقق، والصفحة شغالة عادي' },
+      { text: 'بيلغي الطلب لو السيرفر اتأخر أكتر من ثانية' }
+    ], answer: 1, explain: 'التجميد مش بيحصل: المتصفح بيكمل يرد على المستخدم وينفذ كود تاني. اللي بيستنى هو باقي أسطر الدالة دي بس.' },
+    { q: 'السيرفر رد بـ 404 (الصفحة مش موجودة). الـ fetch هتعتبر ده فشل ويرمي خطأ؟', options: [
+      { text: 'لأ، الطلب يعتبر ناجح طالما في رد، ولازم تتأكد بنفسك من response.ok' },
+      { text: 'أيوه، أي كود خطأ من السيرفر بيرمي exception تلقائياً' },
+      { text: 'بس لو كان 500، أما 404 فبيرمي خطأ' }
+    ], answer: 0, explain: 'fetch بترفض الـ Promise بس في مشاكل الشبكة نفسها (النت فصل مثلاً). أكواد الحالة زي 404 و 500 بتوصلك عادي ولازم تفحصها.' },
+    { q: 'إيه دور try/catch مع await؟', options: [
+      { text: 'تمسك أي فشل في الـ await (نت فاصل، سيرفر واقع) وتعرض للمستخدم حاجة مفيدة بدل ما الكود يقع في صمت' },
+      { text: 'تسرّع تنفيذ الـ Promises المتتالية' },
+      { text: 'تحوّل الـ Promise لداتا من غير ما تحتاج json()' }
+    ], answer: 0, explain: 'الـ await اللي فشل بيرمي خطأ. try/catch بتمسكه وتخليك تتصرف: رسالة، إعادة محاولة، قيمة افتراضية. من غيرها الخطأ بيضيع في الكونسول.' },
+    { q: 'عندك 3 طلبات API مستقلة عن بعض. إيه أسرع طريقة تنفذهم؟', options: [
+      { text: 'Promise.all بيبعتهم مع بعض ويستنى الـ 3 مرة واحدة' },
+      { text: '3 سطور await ورا بعض لأن الترتيب أضمن' },
+      { text: '3 استدعاءات fetch من غير await خالص' }
+    ], answer: 0, explain: 'await ورا بعض = كل طلب يستنى اللي قبله (وقت = المجموع). Promise.all = بالتوازي (وقت = أبطأ واحد). من غير await مش هتقدر تقرا النتايج أصلاً.' },
+    { q: 'كتبت const data = response.json(); من غير await، وبعدين console.log(data). إيه اللي هيظهر؟', options: [
+      { text: 'Promise، لأن json() نفسها بترجع Promise محتاجة await' },
+      { text: 'الداتا عادي، لأن await بتاعت fetch كفت' },
+      { text: 'undefined لأن الريسبونس اتقفل' }
+    ], answer: 0, explain: 'قراية جسم الرد عملية غير متزامنة هي كمان. كل خطوة في السلسلة محتاجة await الخاص بيها.' }
+  ],
+  exercises: [
+    { task: 'في معمل JavaScript اكتب دالة async اسمها fakeLoad بتستنى Promise بينجح بعد ثانية (setTimeout جوا Promise) وبعدين تطبع "الداتا وصلت". ناديها وتأكد إن الكونسول بيطبع "شغال..." الأول لو حطيت console.log بعد النداء.', code: `function waitOneSecond() {
+  return new Promise(resolve => setTimeout(resolve, 1000));
+}
+async function fakeLoad() {
+  console.log('بنحمل...');
+  await waitOneSecond();
+  console.log('الداتا وصلت');
+}
+fakeLoad();
+console.log('شغال...');
+// الترتيب: بنحمل... ثم شغال... ثم (بعد ثانية) الداتا وصلت`, why: '"شغال..." طلع قبل "الداتا وصلت" رغم إنه مكتوب بعدها، لأن await بيسلّم الدفة للمتصفح لحد ما الـ Promise تخلص. دي أهم صورة ذهنية في الدرس كله.' },
+    { task: 'عدّل مثال getUser بحيث لو حصل أي خطأ يطبع "تعذر تحميل البيانات، حاول تاني" بدل رسالة الخطأ التقنية، وجرب تكسر الرابط عمداً وتشوف الرسالة.', code: `async function getUser() {
+  try {
+    const response = await fetch('https://api.example.com/user');
+    if (!response.ok) throw new Error('فشل');
+    const data = await response.json();
+    console.log(data.name);
+  } catch (err) {
+    console.log('تعذر تحميل البيانات، حاول تاني');
+  }
+}
+getUser();`, why: 'المستخدم ميعرفش إيه هو 404 ولا CORS. ترجمة الأغلاط التقنية لرسائل بشرية دي من علامات الكود المحترم.' }
+  ]
+},
+{
   id: 'capstone',
   nav: 'المشروع الختامي',
   title: 'المشروع الختامي: تطبيق Quiz تفاعلي',
