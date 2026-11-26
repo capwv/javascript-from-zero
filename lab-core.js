@@ -125,7 +125,17 @@ var CHALLENGES = [
     desc: 'اطبع عد تنازلي من 5 لـ 1 (كل رقم في سطر) وبعدين في السطر الأخير اطبع: انطلق!',
     starter: "// لوب من 5 لـ 1 وبعدين رسالة الانطلاق\n",
     solution: "for (let i = 5; i >= 1; i--) {\n  console.log(i);\n}\nconsole.log('انطلق!');",
-    expected: '5\n4\n3\n2\n1\nانطلق!' }
+    expected: '5\n4\n3\n2\n1\nانطلق!' },
+  { id: 'map-filter', title: 'فلتر وحوّل',
+    desc: 'عندك const scores = [45, 80, 55, 90, 30]. خد الدرجات اللي 50 أو أكتر بـ filter، حوّلها لضعفها بـ map، واطبع النتيجة (مصفوفة واحدة).',
+    starter: "const scores = [45, 80, 55, 90, 30];\n// فلتر الأول، وبعدين حوّل، وبعدين اطبع\n",
+    solution: "const scores = [45, 80, 55, 90, 30];\nconst result = scores.filter(s => s >= 50).map(s => s * 2);\nconsole.log(result);",
+    expected: '[160,110,180]' },
+  { id: 'reduce-total', title: 'اجمعها كلها',
+    desc: 'اجمع أرقام المصفوفة const cart = [250, 80, 120] بـ reduce واطبع المجموع (رقم واحد).',
+    starter: "const cart = [250, 80, 120];\n// اجمع بـ reduce واطبع\n",
+    solution: "const cart = [250, 80, 120];\nconst total = cart.reduce((sum, x) => sum + x, 0);\nconsole.log(total);",
+    expected: '450' }
 ];
 
 var DEFAULT_CODE = "// اكتب كود JavaScript هنا واضغط: شغّل الكود\nconsole.log('أهلاً يا عالم');\n";
